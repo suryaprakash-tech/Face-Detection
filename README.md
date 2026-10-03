@@ -1,4 +1,4 @@
-# 👤 Face Detection Studio
+# 👤 Face Detection 
 
 An interactive **Computer Vision web application** built using **Python, OpenCV, NumPy, Pillow, and Streamlit**.
 
