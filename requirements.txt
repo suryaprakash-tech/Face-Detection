@@ -1,14 +1,13 @@
-streamlit==1.65.0
+streamlit==1.50.0
 numpy==1.26.4
-Pillow==12.3.0
-pandas==2.2.3
-scikit-learn==1.6.1
+Pillow==11.3.0
+pandas==2.3.3
+scikit-learn==1.7.2
 scikit-image==0.25.2
 
 opencv-python-headless==4.10.0.84
 
 tensorflow==2.20.0
-tf-keras==2.20.0
-
-deepface==0.0.101
+tf-keras==2.20.1
+deepface==0.0.95
 keras-facenet==0.3.2
