@@ -4,11 +4,10 @@ import cv2
 from PIL import Image, ImageDraw
 import urllib.request
 import io
-import math
 
 
 # ============================================================
-# PAGE CONFIGURATION
+# PAGE CONFIG
 # ============================================================
 
 st.set_page_config(
@@ -26,17 +25,24 @@ st.set_page_config(
 st.markdown("""
 <style>
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800&display=swap');
-
 html, body, [class*="css"] {
-    font-family: 'Inter', sans-serif;
+    font-family: Inter, sans-serif;
 }
 
 .stApp {
     background:
-        radial-gradient(circle at 10% 10%, rgba(99, 255, 177, 0.08), transparent 25%),
-        radial-gradient(circle at 90% 20%, rgba(72, 149, 239, 0.07), transparent 25%),
+        radial-gradient(
+            circle at 10% 10%,
+            rgba(99,255,177,0.08),
+            transparent 25%
+        ),
+        radial-gradient(
+            circle at 90% 20%,
+            rgba(72,149,239,0.07),
+            transparent 25%
+        ),
         #0b100e;
+
     color: #edf5ef;
 }
 
@@ -47,35 +53,34 @@ html, body, [class*="css"] {
 }
 
 .hero {
-    border: 1px solid rgba(145, 232, 179, 0.24);
+    border: 1px solid rgba(145,232,179,0.24);
     border-radius: 28px;
     padding: 38px 42px;
     background:
         linear-gradient(
             135deg,
-            rgba(22, 34, 27, 0.96),
-            rgba(14, 22, 18, 0.96)
+            rgba(22,34,27,0.96),
+            rgba(14,22,18,0.96)
         );
     box-shadow:
         0 25px 70px rgba(0,0,0,0.35),
         inset 0 1px 0 rgba(255,255,255,0.03);
+
     margin-bottom: 40px;
 }
 
 .hero-small {
     color: #8ee8b4;
-    font-family: 'DM Mono', monospace;
     font-size: 14px;
     letter-spacing: 2px;
     margin-bottom: 12px;
 }
 
 .hero-title {
-    font-size: clamp(42px, 6vw, 78px);
+    font-size: clamp(42px,6vw,78px);
     font-weight: 800;
     letter-spacing: -4px;
     line-height: 0.95;
-    margin: 0;
 }
 
 .hero-title span {
@@ -88,26 +93,18 @@ html, body, [class*="css"] {
     font-size: 17px;
 }
 
-.hero-pills {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 25px;
-}
-
 .pill {
+    display: inline-block;
     border: 1px solid rgba(142,232,180,0.25);
     background: rgba(142,232,180,0.07);
     color: #bdeecf;
     padding: 8px 14px;
     border-radius: 999px;
     font-size: 13px;
+    margin: 15px 8px 0 0;
 }
 
 .section-heading {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     font-size: 29px;
     font-weight: 800;
     margin-top: 45px;
@@ -129,10 +126,8 @@ html, body, [class*="css"] {
     background: rgba(142,232,180,0.10);
     border: 1px solid rgba(142,232,180,0.28);
     color: #8ee8b4;
-    font-family: 'DM Mono', monospace;
     font-size: 12px;
     letter-spacing: 1px;
-    margin-bottom: 12px;
 }
 
 .card {
@@ -140,8 +135,6 @@ html, body, [class*="css"] {
     background: rgba(20,30,24,0.78);
     border-radius: 22px;
     padding: 24px;
-    height: 100%;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.20);
 }
 
 .card-title {
@@ -154,96 +147,6 @@ html, body, [class*="css"] {
     color: #aab8af;
     line-height: 1.7;
     font-size: 14px;
-}
-
-.operation-card {
-    border: 1px solid rgba(142,232,180,0.20);
-    background: linear-gradient(
-        145deg,
-        rgba(22,34,27,0.95),
-        rgba(14,22,18,0.95)
-    );
-    border-radius: 20px;
-    padding: 23px;
-    min-height: 190px;
-}
-
-.operation-number {
-    color: #8ee8b4;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    margin-bottom: 18px;
-}
-
-.operation-name {
-    font-size: 20px;
-    font-weight: 750;
-    margin-bottom: 10px;
-}
-
-.operation-desc {
-    color: #9eaaa3;
-    font-size: 13px;
-    line-height: 1.6;
-}
-
-.calculation {
-    border: 1px solid rgba(142,232,180,0.23);
-    background: #111a15;
-    border-radius: 24px;
-    padding: 30px;
-    margin-top: 15px;
-}
-
-.calc-label {
-    color: #8ee8b4;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 1px;
-    margin-bottom: 15px;
-}
-
-.calc-step {
-    padding: 15px 18px;
-    border-left: 3px solid #8ee8b4;
-    background: rgba(142,232,180,0.045);
-    border-radius: 0 12px 12px 0;
-    margin: 10px 0;
-    color: #dce8df;
-    line-height: 1.65;
-}
-
-.formula {
-    font-family: 'DM Mono', monospace;
-    color: #baf3ce;
-    font-size: 15px;
-}
-
-.final-result {
-    border: 1px solid rgba(142,232,180,0.42);
-    border-radius: 26px;
-    padding: 30px;
-    background:
-        linear-gradient(
-            135deg,
-            rgba(36,72,51,0.42),
-            rgba(17,28,22,0.94)
-        );
-    box-shadow:
-        0 0 50px rgba(142,232,180,0.07);
-}
-
-.result-title {
-    color: #8ee8b4;
-    font-size: 26px;
-    font-weight: 800;
-}
-
-.result-value {
-    font-family: 'DM Mono', monospace;
-    font-size: 17px;
-    color: #e8fff0;
-    margin-top: 10px;
 }
 
 .metric-card {
@@ -266,10 +169,58 @@ html, body, [class*="css"] {
     margin-top: 4px;
 }
 
-div[data-baseweb="select"] > div {
-    background: #111a15 !important;
-    border-color: rgba(142,232,180,0.3) !important;
-    border-radius: 13px !important;
+.calculation {
+    border: 1px solid rgba(142,232,180,0.23);
+    background: #111a15;
+    border-radius: 24px;
+    padding: 30px;
+    margin-top: 15px;
+}
+
+.calc-label {
+    color: #8ee8b4;
+    font-size: 12px;
+    letter-spacing: 1px;
+    margin-bottom: 15px;
+}
+
+.calc-step {
+    padding: 15px 18px;
+    border-left: 3px solid #8ee8b4;
+    background: rgba(142,232,180,0.045);
+    border-radius: 0 12px 12px 0;
+    margin: 10px 0;
+    color: #dce8df;
+    line-height: 1.65;
+}
+
+.formula {
+    color: #baf3ce;
+    font-size: 15px;
+}
+
+.final-result {
+    border: 1px solid rgba(142,232,180,0.42);
+    border-radius: 26px;
+    padding: 30px;
+    background:
+        linear-gradient(
+            135deg,
+            rgba(36,72,51,0.42),
+            rgba(17,28,22,0.94)
+        );
+}
+
+.result-title {
+    color: #8ee8b4;
+    font-size: 26px;
+    font-weight: 800;
+}
+
+.result-value {
+    font-size: 17px;
+    color: #e8fff0;
+    margin-top: 10px;
 }
 
 .stButton > button {
@@ -281,213 +232,6 @@ div[data-baseweb="select"] > div {
     min-height: 45px;
 }
 
-.stButton > button:hover {
-    border-color: #8ee8b4;
-    background: rgba(142,232,180,0.16);
-}
-
-.stNumberInput input {
-    background: #111a15 !important;
-    color: white !important;
-}
-
-#MainMenu {
-    visibility: hidden;
-}
-
-footer {
-    visibility: hidden;
-}
-
-header {
-    background: transparent !important;
-}
-
-label[data-testid="stWidgetLabel"] p {
-    color: #8ee8b4 !important;
-    font-weight: 700 !important;
-    font-size: 16px !important;
-}
-
-.pixel-panel {
-    border: 1px solid rgba(142,232,180,0.30);
-    background:
-        linear-gradient(
-            145deg,
-            rgba(25,40,31,0.95),
-            rgba(12,20,16,0.98)
-        );
-    border-radius: 24px;
-    padding: 26px;
-    margin-top: 18px;
-    box-shadow:
-        0 15px 45px rgba(0,0,0,0.25),
-        inset 0 1px 0 rgba(255,255,255,0.025);
-}
-
-.pixel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 22px;
-}
-
-.pixel-title {
-    color: #8ee8b4;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    letter-spacing: 2px;
-}
-
-.pixel-badge {
-    color: #baf3ce;
-    background: rgba(142,232,180,0.09);
-    border: 1px solid rgba(142,232,180,0.22);
-    padding: 6px 11px;
-    border-radius: 999px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-}
-
-.pixel-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-}
-
-.pixel-item {
-    background: rgba(142,232,180,0.045);
-    border: 1px solid rgba(142,232,180,0.13);
-    border-radius: 15px;
-    padding: 16px;
-}
-
-.pixel-label {
-    color: #89968e;
-    font-size: 11px;
-    font-family: 'DM Mono', monospace;
-    letter-spacing: 1px;
-    margin-bottom: 7px;
-}
-
-.pixel-value {
-    color: #e8fff0;
-    font-family: 'DM Mono', monospace;
-    font-size: 18px;
-}
-
-.pixel-coordinate {
-    grid-column: span 3;
-    border: 1px solid rgba(142,232,180,0.24);
-    background: rgba(142,232,180,0.075);
-}
-
-.pixel-coordinate .pixel-value {
-    color: #8ee8b4;
-    font-size: 22px;
-}
-
-.pixel-formula {
-    margin-top: 16px;
-    padding: 17px;
-    border-radius: 15px;
-    border-left: 3px solid #8ee8b4;
-    background: rgba(142,232,180,0.045);
-}
-
-.pixel-formula-label {
-    color: #89968e;
-    font-size: 11px;
-    font-family: 'DM Mono', monospace;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-}
-
-.pixel-formula-text {
-    color: #baf3ce;
-    font-family: 'DM Mono', monospace;
-    font-size: 14px;
-    line-height: 1.7;
-}
-
-.pixel-final {
-    margin-top: 16px;
-    padding: 17px;
-    border-radius: 15px;
-    background:
-        linear-gradient(
-            90deg,
-            rgba(142,232,180,0.12),
-            rgba(142,232,180,0.035)
-        );
-    border: 1px solid rgba(142,232,180,0.22);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.pixel-final-label {
-    color: #aab8af;
-    font-size: 13px;
-}
-
-.pixel-final-value {
-    color: #8ee8b4;
-    font-family: 'DM Mono', monospace;
-    font-size: 18px;
-}
-
-.selected-operation-box {
-    margin-top: 18px;
-    padding: 18px 22px;
-    border-radius: 18px;
-    border: 1px solid rgba(142,232,180,0.45);
-    background:
-        linear-gradient(
-            135deg,
-            rgba(142,232,180,0.14),
-            rgba(142,232,180,0.04)
-        );
-}
-
-.selected-operation-label {
-    color: #89968e;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    margin-bottom: 7px;
-}
-
-.selected-operation-name {
-    color: #8ee8b4;
-    font-size: 22px;
-    font-weight: 800;
-}
-
-.selected-operation-description {
-    color: #aab8af;
-    font-size: 13px;
-    margin-top: 6px;
-}
-
-@media (max-width: 700px) {
-
-    .pixel-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .pixel-coordinate {
-        grid-column: span 1;
-    }
-
-    .pixel-final {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
-}
-
 </style>
 """, unsafe_allow_html=True)
 
@@ -497,8 +241,8 @@ label[data-testid="stWidgetLabel"] p {
 # ============================================================
 
 IMAGE_URL = (
-    "https://raw.githubusercontent.com/ageitgey/"
-    "face_recognition/master/examples/obama.jpg"
+    "https://raw.githubusercontent.com/"
+    "ageitgey/face_recognition/master/examples/obama.jpg"
 )
 
 
@@ -512,7 +256,11 @@ def load_default_image():
             headers={"User-Agent": "Mozilla/5.0"}
         )
 
-        with urllib.request.urlopen(request, timeout=15) as response:
+        with urllib.request.urlopen(
+            request,
+            timeout=15
+        ) as response:
+
             data = response.read()
 
         return Image.open(
@@ -523,66 +271,49 @@ def load_default_image():
 
         img = Image.new(
             "RGB",
-            (512, 512),
-            (205, 215, 220)
+            (512,512),
+            (205,215,220)
         )
 
         draw = ImageDraw.Draw(img)
 
-        draw.rectangle(
-            (215, 350, 300, 512),
-            fill=(170, 115, 90)
-        )
-
         draw.ellipse(
-            (135, 70, 380, 370),
-            fill=(180, 125, 98)
+            (135,70,380,370),
+            fill=(180,125,98)
         )
 
         draw.pieslice(
-            (120, 35, 395, 260),
+            (120,35,395,260),
             180,
             360,
-            fill=(35, 30, 28)
+            fill=(35,30,28)
         )
 
-        draw.ellipse((190, 190, 225, 215), fill="white")
-        draw.ellipse((290, 190, 325, 215), fill="white")
-
-        draw.ellipse((202, 197, 213, 208), fill="black")
-        draw.ellipse((302, 197, 313, 208), fill="black")
-
-        draw.line(
-            (260, 205, 248, 270, 270, 275),
-            fill=(100, 65, 55),
-            width=4
+        draw.ellipse(
+            (190,190,225,215),
+            fill="white"
         )
 
-        draw.arc(
-            (215, 265, 310, 315),
-            10,
-            170,
-            fill=(90, 45, 45),
-            width=4
+        draw.ellipse(
+            (290,190,325,215),
+            fill="white"
         )
 
-        draw.polygon(
-            [
-                (215, 350),
-                (155, 405),
-                (90, 512),
-                (425, 512),
-                (355, 405),
-                (300, 350)
-            ],
-            fill=(45, 70, 90)
+        draw.ellipse(
+            (202,197,213,208),
+            fill="black"
+        )
+
+        draw.ellipse(
+            (302,197,313,208),
+            fill="black"
         )
 
         return img
 
 
 # ============================================================
-# UTILITY FUNCTIONS
+# IMAGE CONVERSION
 # ============================================================
 
 def pil_to_cv(image):
@@ -603,6 +334,32 @@ def cv_to_pil(image):
     )
 
 
+# ============================================================
+# OPENCV CASCADE
+# ============================================================
+
+@st.cache_resource
+def load_face_detector():
+
+    cascade_path = (
+        cv2.data.haarcascades
+        +
+        "haarcascade_frontalface_default.xml"
+    )
+
+    cascade = cv2.CascadeClassifier(
+        cascade_path
+    )
+
+    if cascade.empty():
+
+        raise RuntimeError(
+            "Haar Cascade could not be loaded."
+        )
+
+    return cascade
+
+
 def detect_faces(image_bgr):
 
     gray = cv2.cvtColor(
@@ -610,20 +367,21 @@ def detect_faces(image_bgr):
         cv2.COLOR_BGR2GRAY
     )
 
-    cascade = cv2.CascadeClassifier(
-        cv2.data.haarcascades +
-        "haarcascade_frontalface_default.xml"
-    )
+    cascade = load_face_detector()
 
     faces = cascade.detectMultiScale(
         gray,
         scaleFactor=1.1,
         minNeighbors=5,
-        minSize=(45, 45)
+        minSize=(45,45)
     )
 
     return faces
 
+
+# ============================================================
+# DRAW FACES
+# ============================================================
 
 def draw_faces(
     image_bgr,
@@ -633,23 +391,23 @@ def draw_faces(
 
     result = image_bgr.copy()
 
-    for i, (x, y, w, h) in enumerate(faces):
+    for i,(x,y,w,h) in enumerate(faces):
 
         cv2.rectangle(
             result,
-            (x, y),
-            (x + w, y + h),
-            (142, 232, 180),
+            (x,y),
+            (x+w,y+h),
+            (142,232,180),
             3
         )
 
         cv2.putText(
             result,
-            f"{label} {i + 1}",
-            (x, max(30, y - 10)),
+            f"{label} {i+1}",
+            (x,max(30,y-10)),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.75,
-            (142, 232, 180),
+            (142,232,180),
             2,
             cv2.LINE_AA
         )
@@ -657,25 +415,36 @@ def draw_faces(
     return result
 
 
+# ============================================================
+# PIXEL INFORMATION
+# ============================================================
+
 def calculate_pixel_information(
     image_bgr,
     x,
     y
 ):
 
-    height, width = image_bgr.shape[:2]
+    height,width = image_bgr.shape[:2]
 
-    x = max(0, min(x, width - 1))
-    y = max(0, min(y, height - 1))
+    x = max(
+        0,
+        min(x,width-1)
+    )
 
-    b, g, r = image_bgr[y, x]
+    y = max(
+        0,
+        min(y,height-1)
+    )
+
+    b,g,r = image_bgr[y,x]
 
     gray_image = cv2.cvtColor(
         image_bgr,
         cv2.COLOR_BGR2GRAY
     )
 
-    gray_value = gray_image[y, x]
+    gray_value = gray_image[y,x]
 
     return (
         int(r),
@@ -685,7 +454,14 @@ def calculate_pixel_information(
     )
 
 
-def template_match(source_bgr, template_bgr):
+# ============================================================
+# TEMPLATE MATCHING
+# ============================================================
+
+def template_match(
+    source_bgr,
+    template_bgr
+):
 
     source_gray = cv2.cvtColor(
         source_bgr,
@@ -697,25 +473,32 @@ def template_match(source_bgr, template_bgr):
         cv2.COLOR_BGR2GRAY
     )
 
-    sh, sw = source_gray.shape
-    th, tw = template_gray.shape
+    sh,sw = source_gray.shape
+    th,tw = template_gray.shape
 
     if th > sh or tw > sw:
 
         scale = min(
-            sw / tw,
-            sh / th
+            sw/tw,
+            sh/th
         ) * 0.8
 
-        new_w = max(20, int(tw * scale))
-        new_h = max(20, int(th * scale))
+        new_w = max(
+            20,
+            int(tw*scale)
+        )
+
+        new_h = max(
+            20,
+            int(th*scale)
+        )
 
         template_gray = cv2.resize(
             template_gray,
-            (new_w, new_h)
+            (new_w,new_h)
         )
 
-        th, tw = template_gray.shape
+        th,tw = template_gray.shape
 
     result = cv2.matchTemplate(
         source_gray,
@@ -723,19 +506,19 @@ def template_match(source_bgr, template_bgr):
         cv2.TM_CCOEFF_NORMED
     )
 
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(
-        result
+    min_val,max_val,min_loc,max_loc = (
+        cv2.minMaxLoc(result)
     )
 
     return (
         float(max_val),
         max_loc,
-        (tw, th)
+        (tw,th)
     )
 
 
 # ============================================================
-# DEEPFACE IMPORT
+# DEEPFACE
 # ============================================================
 
 @st.cache_resource
@@ -745,10 +528,6 @@ def load_deepface():
 
     return DeepFace
 
-
-# ============================================================
-# DEEPFACE ANALYSIS
-# ============================================================
 
 def run_deepface_analysis(image_bgr):
 
@@ -767,7 +546,7 @@ def run_deepface_analysis(image_bgr):
         silent=True
     )
 
-    if isinstance(result, list):
+    if isinstance(result,list):
 
         return result[0]
 
@@ -775,7 +554,7 @@ def run_deepface_analysis(image_bgr):
 
 
 # ============================================================
-# FACENET EMBEDDING
+# FACENET
 # ============================================================
 
 def get_facenet_embedding(image_bgr):
@@ -789,7 +568,7 @@ def get_facenet_embedding(image_bgr):
         enforce_detection=True
     )
 
-    if isinstance(result, list):
+    if isinstance(result,list):
 
         result = result[0]
 
@@ -798,10 +577,6 @@ def get_facenet_embedding(image_bgr):
         dtype=np.float32
     )
 
-
-# ============================================================
-# FACENET COMPARISON
-# ============================================================
 
 def compare_facenet(
     image1_bgr,
@@ -839,28 +614,17 @@ FACE <span>DETECTION</span>
 </div>
 
 <div class="hero-subtitle">
-Explore facial analysis algorithms through visual processing,
-pixel inspection, mathematical calculations and real-world applications.
+Explore facial analysis algorithms through
+visual processing, pixel inspection,
+mathematical calculations and real-world
+applications.
 </div>
 
-<div class="hero-pills">
-
-<div class="pill">
-Pixel Inspection
-</div>
-
-<div class="pill">
-Face Detection
-</div>
-
-<div class="pill">
-Algorithm Analysis
-</div>
-
-<div class="pill">
-Visual Results
-</div>
-
+<div>
+<span class="pill">Pixel Inspection</span>
+<span class="pill">Face Detection</span>
+<span class="pill">Algorithm Analysis</span>
+<span class="pill">Visual Results</span>
 </div>
 
 </div>
@@ -870,7 +634,7 @@ unsafe_allow_html=True
 
 
 # ============================================================
-# STEP 1 — INPUT IMAGE
+# INPUT IMAGE
 # ============================================================
 
 st.markdown(
@@ -893,14 +657,17 @@ default_image = load_default_image()
 
 
 uploaded = st.file_uploader(
-    "Upload another single-person image (optional)",
-    type=["jpg", "jpeg", "png"],
-    help="Keep the default human portrait or upload your own.",
+    "Upload another single-person image",
+    type=[
+        "jpg",
+        "jpeg",
+        "png"
+    ],
     key="main_image"
 )
 
 
-if uploaded is not None:
+if uploaded:
 
     input_image = Image.open(
         uploaded
@@ -911,90 +678,72 @@ else:
     input_image = default_image
 
 
-image_bgr = pil_to_cv(input_image)
+image_bgr = pil_to_cv(
+    input_image
+)
 
-height, width = image_bgr.shape[:2]
+
+height,width = image_bgr.shape[:2]
 
 channels = image_bgr.shape[2]
 
-total_pixels = width * height
+total_pixels = (
+    width * height
+)
 
 
 st.image(
     input_image,
-    caption="Default Input — Single Human Portrait"
-    if uploaded is None
-    else "Uploaded Input Image",
     width=350
 )
 
 
 # ============================================================
-# IMAGE METRICS
+# METRICS
 # ============================================================
 
-m1, m2, m3, m4 = st.columns(4)
+m1,m2,m3,m4 = st.columns(4)
 
 
 with m1:
 
-    st.markdown(
-        f"""
-        <div class="metric-card">
-        <div class="metric-number">{width}</div>
-        <div class="metric-label">IMAGE WIDTH</div>
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.metric(
+        "IMAGE WIDTH",
+        width
     )
 
 
 with m2:
 
-    st.markdown(
-        f"""
-        <div class="metric-card">
-        <div class="metric-number">{height}</div>
-        <div class="metric-label">IMAGE HEIGHT</div>
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.metric(
+        "IMAGE HEIGHT",
+        height
     )
 
 
 with m3:
 
-    st.markdown(
-        f"""
-        <div class="metric-card">
-        <div class="metric-number">{total_pixels:,}</div>
-        <div class="metric-label">TOTAL PIXELS</div>
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.metric(
+        "TOTAL PIXELS",
+        f"{total_pixels:,}"
     )
 
 
 with m4:
 
-    st.markdown(
-        f"""
-        <div class="metric-card">
-        <div class="metric-number">{channels}</div>
-        <div class="metric-label">CHANNELS</div>
-        </div>
-        """,
-        unsafe_allow_html=True
+    st.metric(
+        "CHANNELS",
+        channels
     )
 
 
 # ============================================================
-# STEP 2 — SELECT OPERATION
+# OPERATION
 # ============================================================
 
 st.markdown(
 """
-<div class="step-badge" style="margin-top:50px;">
+<div class="step-badge">
 STEP 02
 </div>
 
@@ -1008,72 +757,8 @@ unsafe_allow_html=True
 )
 
 
-c1, c2, c3, c4 = st.columns(4)
-
-
-operations = [
-
-    (
-        "01",
-        "Template Matching",
-        "Upload a template image and locate the same visual pattern inside the input image."
-    ),
-
-    (
-        "02",
-        "Viola-Jones",
-        "Actual Haar Cascade face detection using the classical Viola-Jones approach."
-    ),
-
-    (
-        "03",
-        "DeepFace",
-        "Actual deep facial analysis including age, gender, emotion and facial representation."
-    ),
-
-    (
-        "04",
-        "FaceNet",
-        "Generate FaceNet embeddings and compare two face images."
-    )
-
-]
-
-
-cols = [c1, c2, c3, c4]
-
-
-for col, operation in zip(cols, operations):
-
-    with col:
-
-        st.markdown(
-            f"""
-            <div class="operation-card">
-
-            <div class="operation-number">
-            {operation[0]}
-            </div>
-
-            <div class="operation-name">
-            {operation[1]}
-            </div>
-
-            <div class="operation-desc">
-            {operation[2]}
-            </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-st.markdown("<br>", unsafe_allow_html=True)
-
-
 selected_operation = st.selectbox(
-    "Choose the operation to analyze",
+    "Choose the operation",
     [
         "Template Matching",
         "Viola-Jones Algorithm",
@@ -1084,41 +769,28 @@ selected_operation = st.selectbox(
 )
 
 
-# ============================================================
-# OPERATION-SPECIFIC INPUT
-# ============================================================
-
 template_image = None
+
 comparison_image = None
 
 
+# ============================================================
+# TEMPLATE INPUT
+# ============================================================
+
 if selected_operation == "Template Matching":
-
-    st.markdown(
-        """
-        <div class="card">
-
-        <div class="card-title">
-        🎯 Template Image
-        </div>
-
-        <div class="card-text">
-        Upload the image region that you want to locate inside
-        the main input image.
-        </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
 
     template_upload = st.file_uploader(
         "Upload Template Image",
-        type=["jpg", "jpeg", "png"],
+        type=[
+            "jpg",
+            "jpeg",
+            "png"
+        ],
         key="template_upload"
     )
 
-    if template_upload is not None:
+    if template_upload:
 
         template_image = Image.open(
             template_upload
@@ -1126,38 +798,27 @@ if selected_operation == "Template Matching":
 
         st.image(
             template_image,
-            caption="Template Image",
             width=250
         )
 
 
+# ============================================================
+# FACENET INPUT
+# ============================================================
+
 elif selected_operation == "FaceNet":
-
-    st.markdown(
-        """
-        <div class="card">
-
-        <div class="card-title">
-        👥 Face Comparison Image
-        </div>
-
-        <div class="card-text">
-        Upload another face image. FaceNet will generate embeddings
-        for both images and calculate their similarity.
-        </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
 
     comparison_upload = st.file_uploader(
         "Upload Comparison Face Image",
-        type=["jpg", "jpeg", "png"],
+        type=[
+            "jpg",
+            "jpeg",
+            "png"
+        ],
         key="comparison_upload"
     )
 
-    if comparison_upload is not None:
+    if comparison_upload:
 
         comparison_image = Image.open(
             comparison_upload
@@ -1165,46 +826,31 @@ elif selected_operation == "FaceNet":
 
         st.image(
             comparison_image,
-            caption="Comparison Image",
             width=250
         )
 
 
 # ============================================================
-# SELECTED OPERATION
+# FACE DETECTION
 # ============================================================
 
-st.markdown(
-    f"""
-    <div class="selected-operation-box">
+faces = []
 
-    <div class="selected-operation-label">
-    SELECTED OPERATION
-    </div>
+try:
 
-    <div class="selected-operation-name">
-    {selected_operation}
-    </div>
+    faces = detect_faces(
+        image_bgr
+    )
 
-    <div class="selected-operation-description">
-    This operation will be applied to the input image.
-    </div>
+except Exception as e:
 
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+    st.warning(
+        f"OpenCV face detection error: {e}"
+    )
 
-
-# ============================================================
-# COMMON FACE DETECTION
-# ============================================================
-
-faces = detect_faces(
-    image_bgr
-)
 
 face_count = len(faces)
+
 
 output_bgr = image_bgr.copy()
 
@@ -1214,11 +860,13 @@ output_bgr = image_bgr.copy()
 # ============================================================
 
 template_score = 0.0
-template_location = (0, 0)
+
+template_location = (0,0)
 
 deepface_result = None
 
 facenet_embedding = None
+
 facenet_result = None
 
 
@@ -1236,30 +884,34 @@ if selected_operation == "Template Matching":
 
         try:
 
-            template_score, template_location, template_size = template_match(
+            (
+                template_score,
+                template_location,
+                template_size
+            ) = template_match(
                 image_bgr,
                 template_bgr
             )
 
-            tw, th = template_size
+            tw,th = template_size
 
-            x, y = template_location
+            x,y = template_location
 
             cv2.rectangle(
                 output_bgr,
-                (x, y),
-                (x + tw, y + th),
-                (142, 232, 180),
+                (x,y),
+                (x+tw,y+th),
+                (142,232,180),
                 4
             )
 
             cv2.putText(
                 output_bgr,
                 f"Match {template_score:.3f}",
-                (x, max(30, y - 12)),
+                (x,max(30,y-12)),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.75,
-                (142, 232, 180),
+                (142,232,180),
                 2,
                 cv2.LINE_AA
             )
@@ -1273,12 +925,12 @@ if selected_operation == "Template Matching":
     else:
 
         st.info(
-            "Upload a template image above to perform actual template matching."
+            "Upload a template image."
         )
 
 
 # ============================================================
-# VIOLA-JONES
+# VIOLA JONES
 # ============================================================
 
 elif selected_operation == "Viola-Jones Algorithm":
@@ -1304,29 +956,15 @@ elif selected_operation == "DeepFace":
 
     try:
 
-        deepface_result = run_deepface_analysis(
-            image_bgr
-        )
+        with st.spinner(
+            "DeepFace is loading the model... "
+            "First run may take some time."
+        ):
 
-        if face_count > 0:
-
-            x, y, w, h = faces[0]
-
-            cv2.putText(
-                output_bgr,
-                "DeepFace Analysis",
-                (
-                    x,
-                    min(
-                        height - 20,
-                        y + h + 28
-                    )
-                ),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.65,
-                (142, 232, 180),
-                2,
-                cv2.LINE_AA
+            deepface_result = (
+                run_deepface_analysis(
+                    image_bgr
+                )
             )
 
     except Exception as e:
@@ -1340,7 +978,7 @@ elif selected_operation == "DeepFace":
 # FACENET
 # ============================================================
 
-else:
+elif selected_operation == "FaceNet":
 
     output_bgr = draw_faces(
         image_bgr,
@@ -1350,9 +988,15 @@ else:
 
     try:
 
-        facenet_embedding = get_facenet_embedding(
-            image_bgr
-        )
+        with st.spinner(
+            "Loading FaceNet model..."
+        ):
+
+            facenet_embedding = (
+                get_facenet_embedding(
+                    image_bgr
+                )
+            )
 
         if comparison_image is not None:
 
@@ -1360,35 +1004,18 @@ else:
                 comparison_image
             )
 
-            facenet_result = compare_facenet(
-                image_bgr,
-                comparison_bgr
-            )
+            with st.spinner(
+                "Comparing faces..."
+            ):
 
-        if face_count > 0:
-
-            x, y, w, h = faces[0]
-
-            cv2.putText(
-                output_bgr,
-                "FaceNet Embedding",
-                (
-                    x,
-                    min(
-                        height - 20,
-                        y + h + 28
+                facenet_result = (
+                    compare_facenet(
+                        image_bgr,
+                        comparison_bgr
                     )
-                ),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.65,
-                (142, 232, 180),
-                2,
-                cv2.LINE_AA
-            )
+                )
 
     except Exception as e:
-
-        facenet_embedding = None
 
         facenet_result = {
             "error": str(e)
@@ -1396,7 +1023,7 @@ else:
 
 
 # ============================================================
-# OUTPUT IMAGE
+# OUTPUT
 # ============================================================
 
 output_image = cv_to_pil(
@@ -1404,27 +1031,18 @@ output_image = cv_to_pil(
 )
 
 
-# ============================================================
-# PROCESSED OUTPUT
-# ============================================================
-
 st.markdown(
 """
-<div class="step-badge" style="margin-top:50px;">
-PROCESSED OUTPUT
-</div>
-
 <div class="section-heading">
 🖼️ Processed Output
 </div>
-
 <div class="section-line"></div>
 """,
 unsafe_allow_html=True
 )
 
 
-left, right = st.columns(2)
+left,right = st.columns(2)
 
 
 with left:
@@ -1446,12 +1064,12 @@ with right:
 
 
 # ============================================================
-# STEP 3 — PIXEL INSPECTION
+# PIXEL INSPECTION
 # ============================================================
 
 st.markdown(
 """
-<div class="step-badge" style="margin-top:50px;">
+<div class="step-badge">
 STEP 03
 </div>
 
@@ -1465,7 +1083,7 @@ unsafe_allow_html=True
 )
 
 
-p1, p2 = st.columns(2)
+p1,p2 = st.columns(2)
 
 
 with p1:
@@ -1473,9 +1091,8 @@ with p1:
     selected_x = st.number_input(
         "Select X coordinate",
         min_value=0,
-        max_value=width - 1,
-        value=width // 2,
-        step=1
+        max_value=width-1,
+        value=width//2
     )
 
 
@@ -1484,142 +1101,83 @@ with p2:
     selected_y = st.number_input(
         "Select Y coordinate",
         min_value=0,
-        max_value=height - 1,
-        value=height // 2,
-        step=1
+        max_value=height-1,
+        value=height//2
     )
 
 
-r, g, b, gray = calculate_pixel_information(
-    image_bgr,
-    selected_x,
-    selected_y
+r,g,b,gray = (
+    calculate_pixel_information(
+        image_bgr,
+        selected_x,
+        selected_y
+    )
 )
 
-
-# ============================================================
-# PIXEL DISPLAY
-# ============================================================
 
 st.markdown(
-    f"""
-    <div class="pixel-panel">
+f"""
+<div class="calculation">
 
-    <div class="pixel-header">
+<div class="calc-label">
+SELECTED PIXEL
+</div>
 
-    <div class="pixel-title">
-    SELECTED PIXEL
-    </div>
+<div class="calc-step">
+<b>Coordinate:</b>
+({selected_x}, {selected_y})
+</div>
 
-    <div class="pixel-badge">
-    LIVE VALUE
-    </div>
+<div class="calc-step">
+<b>RGB:</b>
+R = {r},
+G = {g},
+B = {b}
+</div>
 
-    </div>
+<div class="calc-step">
 
-    <div class="pixel-grid">
+<b>Grayscale Formula</b><br>
 
-    <div class="pixel-item pixel-coordinate">
+<span class="formula">
+Gray = 0.299R + 0.587G + 0.114B
+</span>
 
-    <div class="pixel-label">
-    COORDINATE
-    </div>
+</div>
 
-    <div class="pixel-value">
-    ({selected_x}, {selected_y})
-    </div>
+<div class="calc-step">
 
-    </div>
+<b>Calculation</b><br>
 
-    <div class="pixel-item">
+0.299({r}) +
+0.587({g}) +
+0.114({b})
+=
+{gray}
 
-    <div class="pixel-label">
-    RED CHANNEL
-    </div>
+</div>
 
-    <div class="pixel-value">
-    R = {r}
-    </div>
+<div class="calc-step">
 
-    </div>
+<b>Final Intensity:</b>
 
-    <div class="pixel-item">
+{gray} / 255
 
-    <div class="pixel-label">
-    GREEN CHANNEL
-    </div>
+</div>
 
-    <div class="pixel-value">
-    G = {g}
-    </div>
-
-    </div>
-
-    <div class="pixel-item">
-
-    <div class="pixel-label">
-    BLUE CHANNEL
-    </div>
-
-    <div class="pixel-value">
-    B = {b}
-    </div>
-
-    </div>
-
-    </div>
-
-    <div class="pixel-formula">
-
-    <div class="pixel-formula-label">
-    GRAYSCALE CALCULATION
-    </div>
-
-    <div class="pixel-formula-text">
-    Gray = 0.299R + 0.587G + 0.114B
-    </div>
-
-    </div>
-
-    <div class="pixel-formula">
-
-    <div class="pixel-formula-label">
-    SUBSTITUTION
-    </div>
-
-    <div class="pixel-formula-text">
-    0.299({r}) + 0.587({g}) + 0.114({b})
-    <br>
-    = {gray}
-    </div>
-
-    </div>
-
-    <div class="pixel-final">
-
-    <div class="pixel-final-label">
-    FINAL PIXEL INTENSITY
-    </div>
-
-    <div class="pixel-final-value">
-    {gray} / 255
-    </div>
-
-    </div>
-
-    </div>
-    """,
-    unsafe_allow_html=True
+</div>
+""",
+unsafe_allow_html=True
 )
 
 
 # ============================================================
-# STEP 4 — DETAILED OPERATION CALCULATION
+# DETAILED CALCULATION
 # ============================================================
 
 st.markdown(
 """
-<div class="step-badge" style="margin-top:50px;">
+<div class="step-badge">
 STEP 04
 </div>
 
@@ -1633,86 +1191,46 @@ unsafe_allow_html=True
 )
 
 
-# ============================================================
-# TEMPLATE CALCULATION
-# ============================================================
-
 if selected_operation == "Template Matching":
 
     st.markdown(
-        f"""
-        <div class="calculation">
+f"""
+<div class="calculation">
 
-        <div class="calc-label">
-        TEMPLATE MATCHING CALCULATION
-        </div>
+<div class="calc-label">
+TEMPLATE MATCHING
+</div>
 
-        <div class="calc-step">
-        <b>Step 1 — Source Image</b><br>
-        Input image size = {width} × {height}
-        </div>
+<div class="calc-step">
+<b>Source Image:</b>
+{width} × {height}
+</div>
 
-        <div class="calc-step">
-        <b>Step 2 — Template Image</b><br>
-        A separate uploaded template image is used as the reference pattern.
-        </div>
+<div class="calc-step">
+<b>Method:</b>
+Sliding window template comparison
+</div>
 
-        <div class="calc-step">
-        <b>Step 3 — Sliding Window</b><br>
-        The template is moved across the source image and compared at each location.
-        </div>
+<div class="calc-step">
+<b>OpenCV Method:</b>
+TM_CCOEFF_NORMED
+</div>
 
-        <div class="calc-step">
-        <b>Step 4 — OpenCV Similarity Calculation</b><br>
-        <span class="formula">
-        TM_CCOEFF_NORMED
-        </span>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+<div class="calc-step">
+<b>Matching Score:</b>
+{template_score:.6f}
+</div>
 
-    if template_image is not None:
+<div class="calc-step">
+<b>Similarity:</b>
+{template_score*100:.2f}%
+</div>
 
-        st.markdown(
-            f"""
-            <div class="calc-step">
-            <b>Maximum Matching Score:</b><br>
-            <span class="formula">
-            {template_score:.6f}
-            </span>
-            </div>
+</div>
+""",
+unsafe_allow_html=True
+)
 
-            <div class="calc-step">
-            <b>Similarity:</b><br>
-            <span class="formula">
-            {template_score * 100:.2f}%
-            </span>
-            </div>
-
-            <div class="calc-step">
-            <b>Best Matching Position:</b><br>
-            ({template_location[0]}, {template_location[1]})
-            </div>
-
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    else:
-
-        st.markdown(
-            """
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-
-# ============================================================
-# VIOLA-JONES CALCULATION
-# ============================================================
 
 elif selected_operation == "Viola-Jones Algorithm":
 
@@ -1730,74 +1248,63 @@ elif selected_operation == "Viola-Jones Algorithm":
     )
 
     st.markdown(
-        f"""
-        <div class="calculation">
+f"""
+<div class="calculation">
 
-        <div class="calc-label">
-        VIOLA–JONES CALCULATION
-        </div>
+<div class="calc-label">
+VIOLA-JONES CALCULATION
+</div>
 
-        <div class="calc-step">
-        <b>Step 1 — Input Image</b><br>
-        Width = {width} pixels<br>
-        Height = {height} pixels<br>
-        Total pixels = {total_pixels:,}
-        </div>
+<div class="calc-step">
+<b>Step 1 — Grayscale Conversion</b><br>
+Gray = 0.299R + 0.587G + 0.114B
+</div>
 
-        <div class="calc-step">
-        <b>Step 2 — Grayscale Conversion</b><br>
-        <span class="formula">
-        Gray = 0.299R + 0.587G + 0.114B
-        </span>
-        </div>
+<div class="calc-step">
+<b>Step 2 — Integral Image</b><br>
+Integral Image =
+{integral.shape[1]} ×
+{integral.shape[0]}
+</div>
 
-        <div class="calc-step">
-        <b>Step 3 — Integral Image</b><br>
-        <span class="formula">
-        II(x,y) = Σ(i≤x,j≤y) I(i,j)
-        </span><br>
-        Integral image size =
-        {integral.shape[1]} × {integral.shape[0]}
-        </div>
+<div class="calc-step">
+<b>Step 3 — Haar-like Features</b><br>
+Rectangular regions measure local contrast.
+</div>
 
-        <div class="calc-step">
-        <b>Step 4 — Haar-like Features</b><br>
-        Rectangular regions measure local contrast.
-        </div>
+<div class="calc-step">
+<b>Step 4 — AdaBoost</b><br>
+Weak classifiers are combined into strong classifiers.
+</div>
 
-        <div class="calc-step">
-        <b>Step 5 — AdaBoost</b><br>
-        Weak classifiers are combined into stronger classifiers.
-        </div>
+<div class="calc-step">
+<b>Step 5 — Cascade</b><br>
+Non-face regions are rejected through multiple stages.
+</div>
 
-        <div class="calc-step">
-        <b>Step 6 — Cascade Classifier</b><br>
-        Non-face regions are rejected through multiple stages.
-        </div>
+<div class="calc-step">
+<b>Total Grayscale Intensity:</b>
+{total_intensity:,}
+</div>
 
-        <div class="calc-step">
-        <b>Total Grayscale Intensity:</b>
-        {total_intensity:,}
-        </div>
+<div class="calc-step">
+<b>Detected Faces:</b>
+{face_count}
+</div>
 
-        <div class="calc-step">
-        <b>Detected Faces:</b>
-        {face_count}
-        </div>
+</div>
+""",
+unsafe_allow_html=True
+)
 
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-
-# ============================================================
-# DEEPFACE CALCULATION
-# ============================================================
 
 elif selected_operation == "DeepFace":
 
-    if deepface_result is not None and "error" not in deepface_result:
+    if (
+        deepface_result is not None
+        and
+        "error" not in deepface_result
+    ):
 
         age = deepface_result.get(
             "age",
@@ -1806,7 +1313,10 @@ elif selected_operation == "DeepFace":
 
         gender = deepface_result.get(
             "dominant_gender",
-            deepface_result.get("gender", "N/A")
+            deepface_result.get(
+                "gender",
+                "N/A"
+            )
         )
 
         emotion = deepface_result.get(
@@ -1824,93 +1334,104 @@ elif selected_operation == "DeepFace":
             {}
         )
 
+        face_w = region.get(
+            "w",
+            0
+        )
+
+        face_h = region.get(
+            "h",
+            0
+        )
+
         face_area = (
-            region.get("w", 0) *
-            region.get("h", 0)
+            face_w * face_h
         )
 
         face_ratio = (
-            face_area / total_pixels * 100
-            if total_pixels > 0
+            face_area /
+            total_pixels *
+            100
+            if total_pixels
             else 0
         )
 
         st.markdown(
-            f"""
-            <div class="calculation">
+f"""
+<div class="calculation">
 
-            <div class="calc-label">
-            DEEPFACE ACTUAL ANALYSIS
-            </div>
+<div class="calc-label">
+DEEPFACE ACTUAL ANALYSIS
+</div>
 
-            <div class="calc-step">
-            <b>Step 1 — Face Detection</b><br>
-            Detected faces = {face_count}
-            </div>
+<div class="calc-step">
+<b>Detected Faces:</b>
+{face_count}
+</div>
 
-            <div class="calc-step">
-            <b>Step 2 — Facial Region</b><br>
-            Face width = {region.get("w", 0)} pixels<br>
-            Face height = {region.get("h", 0)} pixels<br>
-            Face area = {face_area:,} pixels
-            </div>
+<div class="calc-step">
+<b>Face Width:</b>
+{face_w}px<br>
 
-            <div class="calc-step">
-            <b>Step 3 — Face Area Ratio</b><br>
-            <span class="formula">
-            Face Ratio = Face Area / Image Area × 100
-            </span><br>
-            = {face_ratio:.2f}%
-            </div>
+<b>Face Height:</b>
+{face_h}px<br>
 
-            <div class="calc-step">
-            <b>Step 4 — Estimated Age</b><br>
-            <span class="formula">
-            {age}
-            </span>
-            </div>
+<b>Face Area:</b>
+{face_area:,} pixels
+</div>
 
-            <div class="calc-step">
-            <b>Step 5 — Gender</b><br>
-            <span class="formula">
-            {gender}
-            </span>
-            </div>
+<div class="calc-step">
+<b>Face Area Ratio:</b>
+{face_ratio:.2f}%
+</div>
 
-            <div class="calc-step">
-            <b>Step 6 — Dominant Emotion</b><br>
-            <span class="formula">
-            {emotion}
-            </span>
-            </div>
+<div class="calc-step">
+<b>Estimated Age:</b>
+{age}
+</div>
 
-            <div class="calc-step">
-            <b>Step 7 — Dominant Race Category</b><br>
-            <span class="formula">
-            {race}
-            </span>
-            </div>
+<div class="calc-step">
+<b>Gender:</b>
+{gender}
+</div>
 
-            <div class="calc-step">
-            <b>Step 8 — Deep Facial Representation</b><br>
-            DeepFace performs deep neural-network based facial representation.
-            </div>
+<div class="calc-step">
+<b>Dominant Emotion:</b>
+{emotion}
+</div>
 
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+<div class="calc-step">
+<b>Dominant Race Category:</b>
+{race}
+</div>
 
-    elif deepface_result is not None:
+<div class="calc-step">
+<b>Model:</b>
+DeepFace deep-learning facial analysis
+</div>
+
+</div>
+""",
+unsafe_allow_html=True
+)
+
+    elif deepface_result:
 
         st.error(
-            f"DeepFace could not run: {deepface_result['error']}"
+            "DeepFace failed: "
+            +
+            str(
+                deepface_result.get(
+                    "error",
+                    "Unknown error"
+                )
+            )
         )
 
     else:
 
         st.info(
-            "DeepFace analysis is waiting for the model to run."
+            "DeepFace analysis unavailable."
         )
 
 
@@ -1922,181 +1443,129 @@ else:
 
     if facenet_embedding is not None:
 
-        embedding_dimension = len(
+        dimension = len(
             facenet_embedding
         )
 
-        embedding_norm = float(
+        norm = float(
             np.linalg.norm(
                 facenet_embedding
             )
         )
 
         st.markdown(
-            f"""
-            <div class="calculation">
+f"""
+<div class="calculation">
 
-            <div class="calc-label">
-            FACENET ACTUAL EMBEDDING
-            </div>
+<div class="calc-label">
+FACENET EMBEDDING
+</div>
 
-            <div class="calc-step">
-            <b>Step 1 — Face Detection</b><br>
-            Detected faces = {face_count}
-            </div>
+<div class="calc-step">
+<b>Detected Faces:</b>
+{face_count}
+</div>
 
-            <div class="calc-step">
-            <b>Step 2 — Face Representation</b><br>
-            FaceNet model converts the face into a numerical vector.
-            </div>
+<div class="calc-step">
+<b>Embedding Dimension:</b>
+{dimension}
+</div>
 
-            <div class="calc-step">
-            <b>Step 3 — Embedding Dimension</b><br>
-            <span class="formula">
-            {embedding_dimension} dimensions
-            </span>
-            </div>
+<div class="calc-step">
+<b>Embedding:</b><br>
+E = [e₁, e₂, e₃, ..., eₙ]
+</div>
 
-            <div class="calc-step">
-            <b>Step 4 — Embedding Vector</b><br>
-            <span class="formula">
-            E = [e₁, e₂, e₃, ..., eₙ]
-            </span>
-            </div>
+<div class="calc-step">
+<b>Embedding Norm:</b>
+{norm:.6f}
+</div>
 
-            <div class="calc-step">
-            <b>Step 5 — Embedding Norm</b><br>
-            <span class="formula">
-            ||E|| = {embedding_norm:.6f}
-            </span>
-            </div>
-            """,
-            unsafe_allow_html=True
+</div>
+""",
+unsafe_allow_html=True
         )
 
-        if comparison_image is not None and facenet_result is not None:
 
-            if "error" not in facenet_result:
+        if (
+            comparison_image is not None
+            and
+            facenet_result is not None
+            and
+            "error" not in facenet_result
+        ):
 
-                verified = facenet_result.get(
-                    "verified",
-                    False
-                )
+            verified = facenet_result.get(
+                "verified",
+                False
+            )
 
-                distance = facenet_result.get(
+            distance = float(
+                facenet_result.get(
                     "distance",
                     0
                 )
+            )
 
-                threshold = facenet_result.get(
+            threshold = float(
+                facenet_result.get(
                     "threshold",
                     0
                 )
+            )
 
-                similarity = max(
-                    0.0,
-                    min(
-                        100.0,
-                        (1 - float(distance)) * 100
-                    )
+            similarity = max(
+                0,
+                min(
+                    100,
+                    (1-distance)*100
                 )
+            )
 
-                match_text = (
-                    "MATCH — Same person likely"
-                    if verified
-                    else "NO MATCH — Different person likely"
-                )
-
-                st.markdown(
-                    f"""
-                    <div class="calc-step">
-                    <b>Step 6 — FaceNet Comparison</b><br>
-                    Second face image uploaded successfully.
-                    </div>
-
-                    <div class="calc-step">
-                    <b>Cosine Distance:</b><br>
-                    <span class="formula">
-                    {float(distance):.6f}
-                    </span>
-                    </div>
-
-                    <div class="calc-step">
-                    <b>Model Threshold:</b><br>
-                    <span class="formula">
-                    {float(threshold):.6f}
-                    </span>
-                    </div>
-
-                    <div class="calc-step">
-                    <b>Comparison Result:</b><br>
-                    <span class="formula">
-                    {match_text}
-                    </span>
-                    </div>
-
-                    <div class="calc-step">
-                    <b>Educational Similarity Score:</b><br>
-                    <span class="formula">
-                    {similarity:.2f}%
-                    </span>
-                    </div>
-
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
-
-            else:
-
-                st.markdown(
-                    "</div>",
-                    unsafe_allow_html=True
-                )
-
-                st.error(
-                    f"FaceNet comparison could not run: "
-                    f"{facenet_result['error']}"
-                )
-
-        else:
+            result_text = (
+                "MATCH — Same person likely"
+                if verified
+                else
+                "NO MATCH — Different person likely"
+            )
 
             st.markdown(
-                """
-                <div class="calc-step">
-                <b>Step 6 — Face Comparison</b><br>
-                Upload a comparison image above to compare
-                two faces using the actual FaceNet model.
-                </div>
+f"""
+<div class="calculation">
 
-                </div>
-                """,
-                unsafe_allow_html=True
+<div class="calc-step">
+<b>Cosine Distance:</b>
+{distance:.6f}
+</div>
+
+<div class="calc-step">
+<b>Model Threshold:</b>
+{threshold:.6f}
+</div>
+
+<div class="calc-step">
+<b>Result:</b>
+{result_text}
+</div>
+
+<div class="calc-step">
+<b>Educational Similarity:</b>
+{similarity:.2f}%
+</div>
+
+</div>
+""",
+unsafe_allow_html=True
             )
-
-    else:
-
-        error_text = ""
-
-        if facenet_result is not None:
-
-            error_text = facenet_result.get(
-                "error",
-                "Unknown FaceNet error"
-            )
-
-        st.error(
-            f"FaceNet could not run: {error_text}"
-        )
 
 
 # ============================================================
-# STEP 5 — APPLICATION
+# APPLICATION
 # ============================================================
 
 st.markdown(
 """
-<div class="step-badge" style="margin-top:50px;">
+<div class="step-badge">
 STEP 05
 </div>
 
@@ -2112,101 +1581,46 @@ unsafe_allow_html=True
 
 applications = {
 
-    "Template Matching": (
-        "Pattern-Based Face Search",
-        "Useful for locating a known visual pattern inside a larger image using an actual uploaded template."
-    ),
+    "Template Matching":
+        "Pattern-based visual search inside images.",
 
-    "Viola-Jones Algorithm": (
-        "Real-Time Face Detection",
-        "Useful for classical real-time face detection using Haar features and cascade classifiers."
-    ),
+    "Viola-Jones Algorithm":
+        "Classical real-time face detection using Haar features and cascade classifiers.",
 
-    "DeepFace": (
-        "Deep Facial Analysis",
-        "Actual deep-learning facial analysis can estimate age, gender, emotion and other facial attributes."
-    ),
+    "DeepFace":
+        "Deep-learning facial analysis including estimated age, gender and emotion.",
 
-    "FaceNet": (
-        "Face Embedding & Similarity",
-        "FaceNet converts faces into embeddings and compares facial representations using distance measurements."
-    )
-
+    "FaceNet":
+        "Face embedding generation and facial similarity comparison."
 }
 
 
-app_title, app_description = applications[
-    selected_operation
-]
-
-
 st.markdown(
-    f"""
-    <div class="card">
+f"""
+<div class="card">
 
-    <div class="card-title">
-    {app_title}
-    </div>
-
-    <div class="card-text">
-    {app_description}
-    </div>
-
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-
-# ============================================================
-# STEP 6 — PROCESSED OUTPUT
-# ============================================================
-
-st.markdown(
-"""
-<div class="step-badge" style="margin-top:50px;">
-STEP 06
+<div class="card-title">
+{selected_operation}
 </div>
 
-<div class="section-heading">
-🖼️ Processed Output
+<div class="card-text">
+{applications[selected_operation]}
 </div>
 
-<div class="section-line"></div>
+</div>
 """,
 unsafe_allow_html=True
 )
 
 
-left2, right2 = st.columns(2)
-
-
-with left2:
-
-    st.image(
-        input_image,
-        caption="Original Input",
-        width=350
-    )
-
-
-with right2:
-
-    st.image(
-        output_image,
-        caption=f"Processed — {selected_operation}",
-        width=350
-    )
-
-
 # ============================================================
-# STEP 7 — FINAL RESULT
+# FINAL RESULT
 # ============================================================
 
 st.markdown(
 """
-<div class="step-badge" style="margin-top:50px;">
-STEP 07
+<div class="step-badge">
+STEP 06
 </div>
 
 <div class="section-heading">
@@ -2219,113 +1633,132 @@ unsafe_allow_html=True
 )
 
 
-detection_text = (
-    f"{face_count} face(s) detected"
-    if face_count > 0
-    else "No face detected"
-)
-
-
 if selected_operation == "Template Matching":
 
-    if template_image is not None:
+    if template_image:
 
-        final_value = (
-            f"{template_score * 100:.2f}% matching score"
+        final_result = (
+            f"{template_score*100:.2f}% "
+            "matching score"
         )
 
     else:
 
-        final_value = "Upload template image"
+        final_result = (
+            "Upload template image"
+        )
+
 
 elif selected_operation == "Viola-Jones Algorithm":
 
-    final_value = detection_text
+    final_result = (
+        f"{face_count} face(s) detected"
+    )
+
 
 elif selected_operation == "DeepFace":
 
-    if deepface_result is not None and "error" not in deepface_result:
+    if (
+        deepface_result
+        and
+        "error" not in deepface_result
+    ):
 
-        final_value = (
-            f"Age: {deepface_result.get('age', 'N/A')} • "
-            f"Gender: {deepface_result.get('dominant_gender', 'N/A')} • "
-            f"Emotion: {deepface_result.get('dominant_emotion', 'N/A')}"
+        final_result = (
+            f"Age: "
+            f"{deepface_result.get('age','N/A')} • "
+            f"Gender: "
+            f"{deepface_result.get('dominant_gender','N/A')} • "
+            f"Emotion: "
+            f"{deepface_result.get('dominant_emotion','N/A')}"
         )
 
     else:
 
-        final_value = "DeepFace analysis unavailable"
+        final_result = (
+            "DeepFace analysis unavailable"
+        )
+
 
 else:
 
-    if facenet_result is not None and "error" not in facenet_result:
+    if (
+        facenet_result
+        and
+        "error" not in facenet_result
+    ):
 
-        verified = facenet_result.get(
-            "verified",
-            False
-        )
-
-        final_value = (
+        final_result = (
             "MATCH"
-            if verified
-            else "NO MATCH"
+            if facenet_result.get(
+                "verified",
+                False
+            )
+            else
+            "NO MATCH"
         )
 
     elif facenet_embedding is not None:
 
-        final_value = (
+        final_result = (
             f"Embedding generated "
             f"({len(facenet_embedding)} dimensions)"
         )
 
     else:
 
-        final_value = "Upload comparison image"
+        final_result = (
+            "Upload comparison image"
+        )
 
 
 st.markdown(
-    f"""
-    <div class="final-result">
+f"""
+<div class="final-result">
 
-    <div class="result-title">
-    Analysis Complete
-    </div>
+<div class="result-title">
+Analysis Complete
+</div>
 
-    <div class="result-value">
-    Operation: {selected_operation}
-    </div>
+<div class="result-value">
+Operation: {selected_operation}
+</div>
 
-    <div class="result-value">
-    Detection: {detection_text}
-    </div>
+<div class="result-value">
+Detection: {face_count} face(s)
+</div>
 
-    <div class="result-value">
-    Image Size: {width} × {height}
-    </div>
+<div class="result-value">
+Image Size: {width} × {height}
+</div>
 
-    <div class="result-value">
-    Total Pixels: {total_pixels:,}
-    </div>
+<div class="result-value">
+Total Pixels: {total_pixels:,}
+</div>
 
-    <div class="result-value">
-    Pixel Coordinate: ({selected_x}, {selected_y})
-    </div>
+<div class="result-value">
+Pixel Coordinate:
+({selected_x}, {selected_y})
+</div>
 
-    <div class="result-value">
-    Pixel RGB: ({r}, {g}, {b})
-    </div>
+<div class="result-value">
+Pixel RGB:
+({r}, {g}, {b})
+</div>
 
-    <div class="result-value">
-    Grayscale Intensity: {gray}
-    </div>
+<div class="result-value">
+Grayscale Intensity:
+{gray}
+</div>
 
-    <div class="result-value">
-    Final Operation Result: {final_value}
-    </div>
+<div class="result-value">
+Final Operation Result:
+{final_result}
+</div>
 
-    </div>
-    """,
-    unsafe_allow_html=True
+</div>
+""",
+unsafe_allow_html=True
 )
 
 
@@ -2340,10 +1773,10 @@ st.markdown(
 <div style="
 text-align:center;
 color:#718078;
-font-family:'DM Mono', monospace;
 font-size:12px;
 padding:25px;
 ">
+
 FACE DETECTION STUDIO
 &nbsp;•&nbsp;
 PIXEL INSPECTION
@@ -2351,6 +1784,7 @@ PIXEL INSPECTION
 VISUAL ANALYSIS
 &nbsp;•&nbsp;
 COMPUTER VISION
+
 </div>
 """,
 unsafe_allow_html=True
