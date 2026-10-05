@@ -1,4 +1,11 @@
 streamlit
+opencv-python-headless==4.12.0.88
 numpy
 Pillow
-opencv-python-headless==4.14.0.94
+scikit-learn
+pandas
+scikit-image
+tensorflow==2.21.0
+tf-keras==2.21.0
+deepface
+keras-facenet
