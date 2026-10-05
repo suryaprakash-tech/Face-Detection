@@ -232,6 +232,16 @@ html, body, [class*="css"] {
     min-height: 45px;
 }
 
+.stButton > button:hover {
+    border-color: #8ee8b4;
+    background: rgba(142,232,180,0.16);
+}
+
+div[data-baseweb="select"] > div {
+    background: rgba(20,30,24,0.9);
+    border-color: rgba(142,232,180,0.25);
+}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -271,41 +281,41 @@ def load_default_image():
 
         img = Image.new(
             "RGB",
-            (512,512),
-            (205,215,220)
+            (512, 512),
+            (205, 215, 220)
         )
 
         draw = ImageDraw.Draw(img)
 
         draw.ellipse(
-            (135,70,380,370),
-            fill=(180,125,98)
+            (135, 70, 380, 370),
+            fill=(180, 125, 98)
         )
 
         draw.pieslice(
-            (120,35,395,260),
+            (120, 35, 395, 260),
             180,
             360,
-            fill=(35,30,28)
+            fill=(35, 30, 28)
         )
 
         draw.ellipse(
-            (190,190,225,215),
+            (190, 190, 225, 215),
             fill="white"
         )
 
         draw.ellipse(
-            (290,190,325,215),
+            (290, 190, 325, 215),
             fill="white"
         )
 
         draw.ellipse(
-            (202,197,213,208),
+            (202, 197, 213, 208),
             fill="black"
         )
 
         draw.ellipse(
-            (302,197,313,208),
+            (302, 197, 313, 208),
             fill="black"
         )
 
@@ -335,7 +345,7 @@ def cv_to_pil(image):
 
 
 # ============================================================
-# OPENCV CASCADE
+# OPENCV HAAR CASCADE
 # ============================================================
 
 @st.cache_resource
@@ -373,7 +383,7 @@ def detect_faces(image_bgr):
         gray,
         scaleFactor=1.1,
         minNeighbors=5,
-        minSize=(45,45)
+        minSize=(45, 45)
     )
 
     return faces
@@ -391,23 +401,23 @@ def draw_faces(
 
     result = image_bgr.copy()
 
-    for i,(x,y,w,h) in enumerate(faces):
+    for i, (x, y, w, h) in enumerate(faces):
 
         cv2.rectangle(
             result,
-            (x,y),
-            (x+w,y+h),
-            (142,232,180),
+            (x, y),
+            (x + w, y + h),
+            (142, 232, 180),
             3
         )
 
         cv2.putText(
             result,
-            f"{label} {i+1}",
-            (x,max(30,y-10)),
+            f"{label} {i + 1}",
+            (x, max(30, y - 10)),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.75,
-            (142,232,180),
+            (142, 232, 180),
             2,
             cv2.LINE_AA
         )
@@ -425,26 +435,26 @@ def calculate_pixel_information(
     y
 ):
 
-    height,width = image_bgr.shape[:2]
+    height, width = image_bgr.shape[:2]
 
     x = max(
         0,
-        min(x,width-1)
+        min(x, width - 1)
     )
 
     y = max(
         0,
-        min(y,height-1)
+        min(y, height - 1)
     )
 
-    b,g,r = image_bgr[y,x]
+    b, g, r = image_bgr[y, x]
 
     gray_image = cv2.cvtColor(
         image_bgr,
         cv2.COLOR_BGR2GRAY
     )
 
-    gray_value = gray_image[y,x]
+    gray_value = gray_image[y, x]
 
     return (
         int(r),
@@ -473,32 +483,32 @@ def template_match(
         cv2.COLOR_BGR2GRAY
     )
 
-    sh,sw = source_gray.shape
-    th,tw = template_gray.shape
+    sh, sw = source_gray.shape
+    th, tw = template_gray.shape
 
     if th > sh or tw > sw:
 
         scale = min(
-            sw/tw,
-            sh/th
+            sw / tw,
+            sh / th
         ) * 0.8
 
         new_w = max(
             20,
-            int(tw*scale)
+            int(tw * scale)
         )
 
         new_h = max(
             20,
-            int(th*scale)
+            int(th * scale)
         )
 
         template_gray = cv2.resize(
             template_gray,
-            (new_w,new_h)
+            (new_w, new_h)
         )
 
-        th,tw = template_gray.shape
+        th, tw = template_gray.shape
 
     result = cv2.matchTemplate(
         source_gray,
@@ -506,14 +516,14 @@ def template_match(
         cv2.TM_CCOEFF_NORMED
     )
 
-    min_val,max_val,min_loc,max_loc = (
+    min_val, max_val, min_loc, max_loc = (
         cv2.minMaxLoc(result)
     )
 
     return (
         float(max_val),
         max_loc,
-        (tw,th)
+        (tw, th)
     )
 
 
@@ -529,26 +539,26 @@ def load_deepface():
     return DeepFace
 
 
-def run_deepface_analysis(image_bgr):
+def run_deepface_single_action(
+    image_bgr,
+    action
+):
 
     DeepFace = load_deepface()
 
     result = DeepFace.analyze(
         img_path=image_bgr,
-        actions=[
-            "age",
-            "gender",
-            "emotion",
-            "race"
-        ],
+        actions=[action],
         detector_backend="opencv",
         enforce_detection=True,
         silent=True
     )
 
-    if isinstance(result,list):
+    if isinstance(result, list):
 
-        return result[0]
+        if len(result) > 0:
+
+            return result[0]
 
     return result
 
@@ -557,9 +567,19 @@ def run_deepface_analysis(image_bgr):
 # FACENET
 # ============================================================
 
-def get_facenet_embedding(image_bgr):
+@st.cache_resource
+def load_facenet_deepface():
 
-    DeepFace = load_deepface()
+    from deepface import DeepFace
+
+    return DeepFace
+
+
+def get_facenet_embedding(
+    image_bgr
+):
+
+    DeepFace = load_facenet_deepface()
 
     result = DeepFace.represent(
         img_path=image_bgr,
@@ -568,7 +588,7 @@ def get_facenet_embedding(image_bgr):
         enforce_detection=True
     )
 
-    if isinstance(result,list):
+    if isinstance(result, list):
 
         result = result[0]
 
@@ -583,7 +603,7 @@ def compare_facenet(
     image2_bgr
 ):
 
-    DeepFace = load_deepface()
+    DeepFace = load_facenet_deepface()
 
     result = DeepFace.verify(
         img1_path=image1_bgr,
@@ -595,6 +615,35 @@ def compare_facenet(
     )
 
     return result
+
+
+# ============================================================
+# SESSION STATE
+# ============================================================
+
+if "operation_ran" not in st.session_state:
+    st.session_state.operation_ran = False
+
+if "operation_result" not in st.session_state:
+    st.session_state.operation_result = None
+
+if "deepface_result" not in st.session_state:
+    st.session_state.deepface_result = None
+
+if "facenet_embedding" not in st.session_state:
+    st.session_state.facenet_embedding = None
+
+if "facenet_result" not in st.session_state:
+    st.session_state.facenet_result = None
+
+if "template_score" not in st.session_state:
+    st.session_state.template_score = 0.0
+
+if "template_location" not in st.session_state:
+    st.session_state.template_location = (0, 0)
+
+if "template_size" not in st.session_state:
+    st.session_state.template_size = (0, 0)
 
 
 # ============================================================
@@ -634,7 +683,7 @@ unsafe_allow_html=True
 
 
 # ============================================================
-# INPUT IMAGE
+# STEP 01 — INPUT IMAGE
 # ============================================================
 
 st.markdown(
@@ -683,7 +732,7 @@ image_bgr = pil_to_cv(
 )
 
 
-height,width = image_bgr.shape[:2]
+height, width = image_bgr.shape[:2]
 
 channels = image_bgr.shape[2]
 
@@ -702,7 +751,7 @@ st.image(
 # METRICS
 # ============================================================
 
-m1,m2,m3,m4 = st.columns(4)
+m1, m2, m3, m4 = st.columns(4)
 
 
 with m1:
@@ -738,7 +787,7 @@ with m4:
 
 
 # ============================================================
-# OPERATION
+# STEP 02 — OPERATION
 # ============================================================
 
 st.markdown(
@@ -767,6 +816,24 @@ selected_operation = st.selectbox(
     ],
     index=1
 )
+
+
+# Reset operation results when operation changes
+if st.session_state.get("last_operation") != selected_operation:
+
+    st.session_state.operation_ran = False
+
+    st.session_state.operation_result = None
+
+    st.session_state.deepface_result = None
+
+    st.session_state.facenet_embedding = None
+
+    st.session_state.facenet_result = None
+
+    st.session_state.template_score = 0.0
+
+    st.session_state.last_operation = selected_operation
 
 
 template_image = None
@@ -803,6 +870,42 @@ if selected_operation == "Template Matching":
 
 
 # ============================================================
+# DEEPFACE INPUT
+# ============================================================
+
+elif selected_operation == "DeepFace":
+
+    st.markdown(
+        """
+        <div class="card">
+
+        <div class="card-title">
+        🧠 DeepFace Analysis
+        </div>
+
+        <div class="card-text">
+        Select one analysis model. Only the selected
+        model will be loaded, reducing memory usage
+        during deployment.
+        </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    deepface_action = st.selectbox(
+        "Choose DeepFace analysis",
+        [
+            "emotion",
+            "age",
+            "gender",
+            "race"
+        ]
+    )
+
+
+# ============================================================
 # FACENET INPUT
 # ============================================================
 
@@ -831,7 +934,7 @@ elif selected_operation == "FaceNet":
 
 
 # ============================================================
-# FACE DETECTION
+# STEP 03 — FACE DETECTION
 # ============================================================
 
 faces = []
@@ -852,37 +955,104 @@ except Exception as e:
 face_count = len(faces)
 
 
+# ============================================================
+# OUTPUT INITIALIZATION
+# ============================================================
+
 output_bgr = image_bgr.copy()
 
 
+template_score = st.session_state.template_score
+
+template_location = (
+    st.session_state.template_location
+)
+
+template_size = (
+    st.session_state.template_size
+)
+
+deepface_result = (
+    st.session_state.deepface_result
+)
+
+facenet_embedding = (
+    st.session_state.facenet_embedding
+)
+
+facenet_result = (
+    st.session_state.facenet_result
+)
+
+
 # ============================================================
-# RESULT VARIABLES
+# ACTUAL OPERATION BUTTON
 # ============================================================
 
-template_score = 0.0
+run_operation = False
 
-template_location = (0,0)
-
-deepface_result = None
-
-facenet_embedding = None
-
-facenet_result = None
-
-
-# ============================================================
-# TEMPLATE MATCHING
-# ============================================================
 
 if selected_operation == "Template Matching":
 
     if template_image is not None:
 
-        template_bgr = pil_to_cv(
-            template_image
+        run_operation = st.button(
+            "▶ Run Template Matching",
+            use_container_width=True
         )
 
-        try:
+    else:
+
+        st.info(
+            "Upload a template image to perform Template Matching."
+        )
+
+
+elif selected_operation == "Viola-Jones Algorithm":
+
+    run_operation = st.button(
+        "▶ Run Viola-Jones Face Detection",
+        use_container_width=True
+    )
+
+
+elif selected_operation == "DeepFace":
+
+    run_operation = st.button(
+        f"▶ Run DeepFace {deepface_action.title()} Analysis",
+        use_container_width=True
+    )
+
+
+elif selected_operation == "FaceNet":
+
+    run_operation = st.button(
+        "▶ Generate FaceNet Embedding / Compare",
+        use_container_width=True
+    )
+
+
+# ============================================================
+# TEMPLATE MATCHING — ACTUAL
+# ============================================================
+
+if (
+    run_operation
+    and
+    selected_operation == "Template Matching"
+    and
+    template_image is not None
+):
+
+    template_bgr = pil_to_cv(
+        template_image
+    )
+
+    try:
+
+        with st.spinner(
+            "Performing actual template matching..."
+        ):
 
             (
                 template_score,
@@ -893,45 +1063,211 @@ if selected_operation == "Template Matching":
                 template_bgr
             )
 
-            tw,th = template_size
+        st.session_state.template_score = (
+            template_score
+        )
 
-            x,y = template_location
+        st.session_state.template_location = (
+            template_location
+        )
 
-            cv2.rectangle(
-                output_bgr,
-                (x,y),
-                (x+tw,y+th),
-                (142,232,180),
-                4
-            )
+        st.session_state.template_size = (
+            template_size
+        )
 
-            cv2.putText(
-                output_bgr,
-                f"Match {template_score:.3f}",
-                (x,max(30,y-12)),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                0.75,
-                (142,232,180),
-                2,
-                cv2.LINE_AA
-            )
+        st.session_state.operation_ran = True
 
-        except Exception as e:
+        st.session_state.operation_result = (
+            "Template Matching completed"
+        )
 
-            st.error(
-                f"Template Matching error: {e}"
-            )
+    except Exception as e:
 
-    else:
-
-        st.info(
-            "Upload a template image."
+        st.error(
+            f"Template Matching error: {e}"
         )
 
 
 # ============================================================
-# VIOLA JONES
+# VIOLA-JONES — ACTUAL
 # ============================================================
+
+if (
+    run_operation
+    and
+    selected_operation == "Viola-Jones Algorithm"
+):
+
+    try:
+
+        with st.spinner(
+            "Running actual Viola-Jones detection..."
+        ):
+
+            faces = detect_faces(
+                image_bgr
+            )
+
+        face_count = len(faces)
+
+        st.session_state.operation_ran = True
+
+        st.session_state.operation_result = (
+            "Viola-Jones detection completed"
+        )
+
+    except Exception as e:
+
+        st.error(
+            f"Viola-Jones error: {e}"
+        )
+
+
+# ============================================================
+# DEEPFACE — ACTUAL
+# ============================================================
+
+if (
+    run_operation
+    and
+    selected_operation == "DeepFace"
+):
+
+    try:
+
+        with st.spinner(
+            f"Loading DeepFace {deepface_action} model "
+            "and analyzing the image..."
+        ):
+
+            deepface_result = (
+                run_deepface_single_action(
+                    image_bgr,
+                    deepface_action
+                )
+            )
+
+        st.session_state.deepface_result = (
+            deepface_result
+        )
+
+        st.session_state.operation_ran = True
+
+        st.session_state.operation_result = (
+            f"DeepFace {deepface_action} analysis completed"
+        )
+
+    except Exception as e:
+
+        st.session_state.deepface_result = {
+            "error": str(e)
+        }
+
+        st.error(
+            "DeepFace could not complete the analysis."
+        )
+
+        st.info(
+            "This can happen on low-memory CPU deployments "
+            "because DeepFace models are large."
+        )
+
+
+# ============================================================
+# FACENET — ACTUAL
+# ============================================================
+
+if (
+    run_operation
+    and
+    selected_operation == "FaceNet"
+):
+
+    try:
+
+        with st.spinner(
+            "Loading FaceNet and generating embedding..."
+        ):
+
+            facenet_embedding = (
+                get_facenet_embedding(
+                    image_bgr
+                )
+            )
+
+        st.session_state.facenet_embedding = (
+            facenet_embedding
+        )
+
+        if comparison_image is not None:
+
+            comparison_bgr = pil_to_cv(
+                comparison_image
+            )
+
+            with st.spinner(
+                "Comparing the two faces..."
+            ):
+
+                facenet_result = (
+                    compare_facenet(
+                        image_bgr,
+                        comparison_bgr
+                    )
+                )
+
+            st.session_state.facenet_result = (
+                facenet_result
+            )
+
+        st.session_state.operation_ran = True
+
+        st.session_state.operation_result = (
+            "FaceNet operation completed"
+        )
+
+    except Exception as e:
+
+        st.session_state.facenet_result = {
+            "error": str(e)
+        }
+
+        st.error(
+            f"FaceNet error: {e}"
+        )
+
+
+# ============================================================
+# DRAW ACTUAL OUTPUT
+# ============================================================
+
+if selected_operation == "Template Matching":
+
+    if st.session_state.operation_ran:
+
+        x, y = template_location
+
+        tw, th = template_size
+
+        cv2.rectangle(
+            output_bgr,
+            (x, y),
+            (x + tw, y + th),
+            (142, 232, 180),
+            4
+        )
+
+        cv2.putText(
+            output_bgr,
+            f"Match {template_score:.3f}",
+            (x, max(30, y - 12)),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.75,
+            (142, 232, 180),
+            2,
+            cv2.LINE_AA
+        )
+
 
 elif selected_operation == "Viola-Jones Algorithm":
 
@@ -942,10 +1278,6 @@ elif selected_operation == "Viola-Jones Algorithm":
     )
 
 
-# ============================================================
-# DEEPFACE
-# ============================================================
-
 elif selected_operation == "DeepFace":
 
     output_bgr = draw_faces(
@@ -954,29 +1286,6 @@ elif selected_operation == "DeepFace":
         "DeepFace"
     )
 
-    try:
-
-        with st.spinner(
-            "DeepFace is loading the model... "
-            "First run may take some time."
-        ):
-
-            deepface_result = (
-                run_deepface_analysis(
-                    image_bgr
-                )
-            )
-
-    except Exception as e:
-
-        deepface_result = {
-            "error": str(e)
-        }
-
-
-# ============================================================
-# FACENET
-# ============================================================
 
 elif selected_operation == "FaceNet":
 
@@ -986,44 +1295,9 @@ elif selected_operation == "FaceNet":
         "FaceNet"
     )
 
-    try:
-
-        with st.spinner(
-            "Loading FaceNet model..."
-        ):
-
-            facenet_embedding = (
-                get_facenet_embedding(
-                    image_bgr
-                )
-            )
-
-        if comparison_image is not None:
-
-            comparison_bgr = pil_to_cv(
-                comparison_image
-            )
-
-            with st.spinner(
-                "Comparing faces..."
-            ):
-
-                facenet_result = (
-                    compare_facenet(
-                        image_bgr,
-                        comparison_bgr
-                    )
-                )
-
-    except Exception as e:
-
-        facenet_result = {
-            "error": str(e)
-        }
-
 
 # ============================================================
-# OUTPUT
+# STEP 03 — PROCESSED OUTPUT
 # ============================================================
 
 output_image = cv_to_pil(
@@ -1036,13 +1310,14 @@ st.markdown(
 <div class="section-heading">
 🖼️ Processed Output
 </div>
+
 <div class="section-line"></div>
 """,
 unsafe_allow_html=True
 )
 
 
-left,right = st.columns(2)
+left, right = st.columns(2)
 
 
 with left:
@@ -1064,7 +1339,7 @@ with right:
 
 
 # ============================================================
-# PIXEL INSPECTION
+# STEP 04 — PIXEL INSPECTION
 # ============================================================
 
 st.markdown(
@@ -1083,7 +1358,7 @@ unsafe_allow_html=True
 )
 
 
-p1,p2 = st.columns(2)
+p1, p2 = st.columns(2)
 
 
 with p1:
@@ -1091,8 +1366,8 @@ with p1:
     selected_x = st.number_input(
         "Select X coordinate",
         min_value=0,
-        max_value=width-1,
-        value=width//2
+        max_value=width - 1,
+        value=width // 2
     )
 
 
@@ -1101,12 +1376,12 @@ with p2:
     selected_y = st.number_input(
         "Select Y coordinate",
         min_value=0,
-        max_value=height-1,
-        value=height//2
+        max_value=height - 1,
+        value=height // 2
     )
 
 
-r,g,b,gray = (
+r, g, b, gray = (
     calculate_pixel_information(
         image_bgr,
         selected_x,
@@ -1172,7 +1447,7 @@ unsafe_allow_html=True
 
 
 # ============================================================
-# DETAILED CALCULATION
+# STEP 05 — DETAILED CALCULATION
 # ============================================================
 
 st.markdown(
@@ -1191,19 +1466,30 @@ unsafe_allow_html=True
 )
 
 
+# ============================================================
+# TEMPLATE CALCULATION
+# ============================================================
+
 if selected_operation == "Template Matching":
 
-    st.markdown(
+    if st.session_state.operation_ran:
+
+        st.markdown(
 f"""
 <div class="calculation">
 
 <div class="calc-label">
-TEMPLATE MATCHING
+TEMPLATE MATCHING — ACTUAL CALCULATION
 </div>
 
 <div class="calc-step">
 <b>Source Image:</b>
 {width} × {height}
+</div>
+
+<div class="calc-step">
+<b>Template Size:</b>
+{template_size[0]} × {template_size[1]}
 </div>
 
 <div class="calc-step">
@@ -1217,20 +1503,35 @@ TM_CCOEFF_NORMED
 </div>
 
 <div class="calc-step">
-<b>Matching Score:</b>
+<b>Best Location:</b>
+({template_location[0]}, {template_location[1]})
+</div>
+
+<div class="calc-step">
+<b>Actual Matching Score:</b>
 {template_score:.6f}
 </div>
 
 <div class="calc-step">
 <b>Similarity:</b>
-{template_score*100:.2f}%
+{template_score * 100:.2f}%
 </div>
 
 </div>
 """,
 unsafe_allow_html=True
-)
+        )
 
+    else:
+
+        st.info(
+            "Run Template Matching to display the actual calculation."
+        )
+
+
+# ============================================================
+# VIOLA-JONES CALCULATION
+# ============================================================
 
 elif selected_operation == "Viola-Jones Algorithm":
 
@@ -1252,34 +1553,38 @@ f"""
 <div class="calculation">
 
 <div class="calc-label">
-VIOLA-JONES CALCULATION
+VIOLA-JONES — ACTUAL PROCESSING
 </div>
 
 <div class="calc-step">
 <b>Step 1 — Grayscale Conversion</b><br>
-Gray = 0.299R + 0.587G + 0.114B
+Original image:
+{width} × {height} × {channels}
 </div>
 
 <div class="calc-step">
-<b>Step 2 — Integral Image</b><br>
-Integral Image =
-{integral.shape[1]} ×
-{integral.shape[0]}
+<b>Step 2 — Grayscale Image</b><br>
+Generated grayscale image:
+{gray_image.shape[1]} × {gray_image.shape[0]}
 </div>
 
 <div class="calc-step">
-<b>Step 3 — Haar-like Features</b><br>
-Rectangular regions measure local contrast.
+<b>Step 3 — Integral Image</b><br>
+Integral image size:
+{integral.shape[1]} × {integral.shape[0]}
 </div>
 
 <div class="calc-step">
-<b>Step 4 — AdaBoost</b><br>
-Weak classifiers are combined into strong classifiers.
+<b>Step 4 — Haar-like Features</b><br>
+The Haar cascade evaluates rectangular contrast
+patterns used by the trained classifier.
 </div>
 
 <div class="calc-step">
-<b>Step 5 — Cascade</b><br>
-Non-face regions are rejected through multiple stages.
+<b>Step 5 — Cascade Classification</b><br>
+The OpenCV Haar cascade evaluates candidate
+regions and rejects non-face regions through
+multiple classifier stages.
 </div>
 
 <div class="calc-step">
@@ -1295,8 +1600,12 @@ Non-face regions are rejected through multiple stages.
 </div>
 """,
 unsafe_allow_html=True
-)
+    )
 
+
+# ============================================================
+# DEEPFACE CALCULATION
+# ============================================================
 
 elif selected_operation == "DeepFace":
 
@@ -1305,29 +1614,6 @@ elif selected_operation == "DeepFace":
         and
         "error" not in deepface_result
     ):
-
-        age = deepface_result.get(
-            "age",
-            "N/A"
-        )
-
-        gender = deepface_result.get(
-            "dominant_gender",
-            deepface_result.get(
-                "gender",
-                "N/A"
-            )
-        )
-
-        emotion = deepface_result.get(
-            "dominant_emotion",
-            "N/A"
-        )
-
-        race = deepface_result.get(
-            "dominant_race",
-            "N/A"
-        )
 
         region = deepface_result.get(
             "region",
@@ -1356,12 +1642,27 @@ elif selected_operation == "DeepFace":
             else 0
         )
 
+        action_value = (
+            deepface_result.get(
+                "dominant_" + deepface_action,
+                deepface_result.get(
+                    deepface_action,
+                    "N/A"
+                )
+            )
+        )
+
         st.markdown(
 f"""
 <div class="calculation">
 
 <div class="calc-label">
-DEEPFACE ACTUAL ANALYSIS
+DEEPFACE — ACTUAL ANALYSIS
+</div>
+
+<div class="calc-step">
+<b>Analysis Type:</b>
+{deepface_action.title()}
 </div>
 
 <div class="calc-step">
@@ -1386,23 +1687,8 @@ DEEPFACE ACTUAL ANALYSIS
 </div>
 
 <div class="calc-step">
-<b>Estimated Age:</b>
-{age}
-</div>
-
-<div class="calc-step">
-<b>Gender:</b>
-{gender}
-</div>
-
-<div class="calc-step">
-<b>Dominant Emotion:</b>
-{emotion}
-</div>
-
-<div class="calc-step">
-<b>Dominant Race Category:</b>
-{race}
+<b>Actual DeepFace Result:</b>
+{action_value}
 </div>
 
 <div class="calc-step">
@@ -1413,7 +1699,7 @@ DeepFace deep-learning facial analysis
 </div>
 """,
 unsafe_allow_html=True
-)
+        )
 
     elif deepface_result:
 
@@ -1431,7 +1717,7 @@ unsafe_allow_html=True
     else:
 
         st.info(
-            "DeepFace analysis unavailable."
+            "Run DeepFace analysis to display the actual result."
         )
 
 
@@ -1439,7 +1725,7 @@ unsafe_allow_html=True
 # FACENET CALCULATION
 # ============================================================
 
-else:
+elif selected_operation == "FaceNet":
 
     if facenet_embedding is not None:
 
@@ -1458,7 +1744,7 @@ f"""
 <div class="calculation">
 
 <div class="calc-label">
-FACENET EMBEDDING
+FACENET — ACTUAL EMBEDDING
 </div>
 
 <div class="calc-step">
@@ -1479,6 +1765,11 @@ E = [e₁, e₂, e₃, ..., eₙ]
 <div class="calc-step">
 <b>Embedding Norm:</b>
 {norm:.6f}
+</div>
+
+<div class="calc-step">
+<b>Model:</b>
+FaceNet
 </div>
 
 </div>
@@ -1518,7 +1809,7 @@ unsafe_allow_html=True
                 0,
                 min(
                     100,
-                    (1-distance)*100
+                    (1 - distance) * 100
                 )
             )
 
@@ -1544,7 +1835,7 @@ f"""
 </div>
 
 <div class="calc-step">
-<b>Result:</b>
+<b>Verification:</b>
 {result_text}
 </div>
 
@@ -1558,9 +1849,15 @@ f"""
 unsafe_allow_html=True
             )
 
+    else:
+
+        st.info(
+            "Run FaceNet to generate the actual embedding."
+        )
+
 
 # ============================================================
-# APPLICATION
+# STEP 05 — APPLICATION
 # ============================================================
 
 st.markdown(
@@ -1588,7 +1885,7 @@ applications = {
         "Classical real-time face detection using Haar features and cascade classifiers.",
 
     "DeepFace":
-        "Deep-learning facial analysis including estimated age, gender and emotion.",
+        "Deep-learning facial analysis including estimated age, gender, emotion and other facial attributes.",
 
     "FaceNet":
         "Face embedding generation and facial similarity comparison."
@@ -1614,7 +1911,7 @@ unsafe_allow_html=True
 
 
 # ============================================================
-# FINAL RESULT
+# STEP 06 — FINAL RESULT
 # ============================================================
 
 st.markdown(
@@ -1635,25 +1932,33 @@ unsafe_allow_html=True
 
 if selected_operation == "Template Matching":
 
-    if template_image:
+    if st.session_state.operation_ran:
 
         final_result = (
-            f"{template_score*100:.2f}% "
+            f"{template_score * 100:.2f}% "
             "matching score"
         )
 
     else:
 
         final_result = (
-            "Upload template image"
+            "Run Template Matching"
         )
 
 
 elif selected_operation == "Viola-Jones Algorithm":
 
-    final_result = (
-        f"{face_count} face(s) detected"
-    )
+    if st.session_state.operation_ran:
+
+        final_result = (
+            f"{face_count} face(s) detected"
+        )
+
+    else:
+
+        final_result = (
+            "Run Viola-Jones"
+        )
 
 
 elif selected_operation == "DeepFace":
@@ -1664,19 +1969,25 @@ elif selected_operation == "DeepFace":
         "error" not in deepface_result
     ):
 
+        action_value = (
+            deepface_result.get(
+                "dominant_" + deepface_action,
+                deepface_result.get(
+                    deepface_action,
+                    "N/A"
+                )
+            )
+        )
+
         final_result = (
-            f"Age: "
-            f"{deepface_result.get('age','N/A')} • "
-            f"Gender: "
-            f"{deepface_result.get('dominant_gender','N/A')} • "
-            f"Emotion: "
-            f"{deepface_result.get('dominant_emotion','N/A')}"
+            f"{deepface_action.title()}: "
+            f"{action_value}"
         )
 
     else:
 
         final_result = (
-            "DeepFace analysis unavailable"
+            "Run DeepFace analysis"
         )
 
 
@@ -1708,7 +2019,7 @@ else:
     else:
 
         final_result = (
-            "Upload comparison image"
+            "Run FaceNet"
         )
 
 
